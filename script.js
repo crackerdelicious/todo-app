@@ -30,12 +30,56 @@ class TodoItem {
     }
 }
 
+// ------ TodoList Class ------
+class TodoList {
+    constructor() {
+        this.todos = []; // Initialize an empty array to store TodoItem objects
+        this.loadTodos(); // Load to-dos from localStorage when a TodoList is created
+    }
+
+    addTodo(todoItem) {
+        this.todos.push(todoItem);
+        this.saveTodos(); // Save after adding
+    }
+
+    removeTodo(id) {
+        this.todos = this.todos.filter(todo => todo.id !== id);
+        this.saveTodos(); // Save after removing
+    }
+
+    saveTodos() {
+        localStorage.setItem('todos', JSON.stringify(this.todos));
+    }
+
+    loadTodos() {
+        const savedTodos = localStorage.getItem('todos');
+        if (savedTodos) {
+            const todosData = JSON.parse(savedTodos);
+            // Important: Create TodoItem instances from the loaded data
+            this.todos = todosData.map(todoData => new TodoItem(
+                todoData.text,
+                todoData.completed,
+                todoData.dueDate,
+                todoData.priority
+            ));
+        }
+    }
+    
+    // find todo by ID
+    findTodoById(id) {
+        return this.todos.find(todo => todo.id === id);
+    }
+}
+
 // Get references to the HTML elements we need to interact with
 const newTodoInput = document.getElementById("new-todo-input");
 const addTodoButton = document.getElementById("add-todo-button");
-const todoList = document.getElementById("todo-list");
+const todoListElement = document.getElementById("todo-list"); // Renamed to avoid conflict
 const newTodoDueDate = document.getElementById('new-todo-due-date');
 const newTodoPriority = document.getElementById('new-todo-priority');
+
+// Create a single instance of TodoList
+const todoList = new TodoList();
 
 // Add an event listener to the button to call the addTodo function when clicked
 addTodoButton.addEventListener("click", addTodo);
@@ -45,11 +89,6 @@ newTodoInput.addEventListener("keypress", function (event) {
         addTodo();
     }
 });
-
-
-
-// Load to-dos from localStorage
-loadTodos();
 
 // Function to add a new to-do item
 function addTodo() {
@@ -65,6 +104,12 @@ function addTodo() {
 
     // Create a new TodoItem object
     const newTodo = new TodoItem(todoText, false, dueDate, priority);
+    todoList.addTodo(newTodo); // Add the new TodoItem to the TodoList
+    
+    // Clear the input field
+    newTodoInput.value = "";
+    newTodoDueDate.value = "";
+    newTodoPriority.value = "Medium";
 
     // Create a new list item (li) element
     const newTodoItem = document.createElement("li");
@@ -102,14 +147,11 @@ function addTodo() {
     // newTodoItem.addEventListener("click", toggleComplete); // We'll handle this differently later
 
     // Add the new li element to the ul
-    todoList.appendChild(newTodoItem);
-    // Clear the input field
-    newTodoInput.value = "";
-    newTodoDueDate.value = "";
-    newTodoPriority.value = "Medium";
+    todoListElement.appendChild(newTodoItem); // Append to the actual list element
+
 
     // saveTodos(); // We'll handle this differently later
-    console.log(newTodo);
+    console.log(todoList.todos); // Log the array of TodoItems (for debugging)
 }
 
 // Function to toggle the 'completed' class on a to-do item
