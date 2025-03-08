@@ -1,6 +1,6 @@
 // ------ TodoItem Class ------
 class TodoItem {
-    constructor(text, completed = false, dueDate = null, priority = 'Medium') {
+    constructor(text, completed = false, dueDate = null, priority = "Medium") {
         this.text = text;
         this.completed = completed;
         this.dueDate = dueDate;
@@ -9,8 +9,10 @@ class TodoItem {
     }
 
     generatedId() {
-        return Math.random().toString(36).substring(2, 15) + 
-        Math.random().toString(36).substring(2, 15)
+        return (
+            Math.random().toString(36).substring(2, 15) +
+            Math.random().toString(36).substring(2, 15)
+        );
     }
 
     toggleComplete() {
@@ -26,7 +28,7 @@ class TodoItem {
     }
 
     updatePriority(newPriority) {
-        this.newPriority = newPriority
+        this.newPriority = newPriority;
     }
 }
 
@@ -40,34 +42,76 @@ class TodoList {
     addTodo(todoItem) {
         this.todos.push(todoItem);
         this.saveTodos(); // Save after adding
+        this.render(); // Re-render the list after adding
     }
 
     removeTodo(id) {
-        this.todos = this.todos.filter(todo => todo.id !== id);
+        this.todos = this.todos.filter((todo) => todo.id !== id);
         this.saveTodos(); // Save after removing
+        this.render(); // Re-render the list after removing
     }
 
     saveTodos() {
-        localStorage.setItem('todos', JSON.stringify(this.todos));
+        localStorage.setItem("todos", JSON.stringify(this.todos));
     }
 
     loadTodos() {
-        const savedTodos = localStorage.getItem('todos');
+        const savedTodos = localStorage.getItem("todos");
         if (savedTodos) {
             const todosData = JSON.parse(savedTodos);
             // Important: Create TodoItem instances from the loaded data
-            this.todos = todosData.map(todoData => new TodoItem(
-                todoData.text,
-                todoData.completed,
-                todoData.dueDate,
-                todoData.priority
-            ));
+            this.todos = todosData.map(
+                (todoData) =>
+                    new TodoItem(
+                        todoData.text,
+                        todoData.completed,
+                        todoData.dueDate,
+                        todoData.priority
+                    )
+            );
         }
     }
-    
+
     // find todo by ID
     findTodoById(id) {
-        return this.todos.find(todo => todo.id === id);
+        return this.todos.find((todo) => todo.id === id);
+    }
+
+    render() {
+        todoListElement.innerHTML = ""; // Clear the existing list
+
+        this.todos.forEach((todo) => {
+            const newTodoItem = document.createElement("li");
+            newTodoItem.dataset.id = todo.id; // Store the ID on the li element
+
+            const textSpan = document.createElement("span");
+            textSpan.textContent = todo.text;
+            textSpan.classList.add("todo-text"); // Add a class for targeting
+            newTodoItem.appendChild(textSpan);
+
+            if (todo.dueDate) {
+                const dueDateSpan = document.createElement("span");
+                dueDateSpan.classList.add("due-date");
+                dueDateSpan.textContent = `Due: ${todo.dueDate}`;
+                newTodoItem.appendChild(dueDateSpan);
+            }
+
+            const prioritySpan = document.createElement("span");
+            prioritySpan.classList.add("priority");
+            prioritySpan.classList.add(todo.priority);
+            prioritySpan.textContent = todo.priority;
+            newTodoItem.appendChild(prioritySpan);
+
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            newTodoItem.appendChild(deleteButton);
+
+            if (todo.completed) {
+                newTodoItem.classList.add("completed");
+            }
+
+            todoListElement.appendChild(newTodoItem);
+        });
     }
 }
 
@@ -75,8 +119,8 @@ class TodoList {
 const newTodoInput = document.getElementById("new-todo-input");
 const addTodoButton = document.getElementById("add-todo-button");
 const todoListElement = document.getElementById("todo-list"); // Renamed to avoid conflict
-const newTodoDueDate = document.getElementById('new-todo-due-date');
-const newTodoPriority = document.getElementById('new-todo-priority');
+const newTodoDueDate = document.getElementById("new-todo-due-date");
+const newTodoPriority = document.getElementById("new-todo-priority");
 
 // Create a single instance of TodoList
 const todoList = new TodoList();
@@ -89,6 +133,8 @@ newTodoInput.addEventListener("keypress", function (event) {
         addTodo();
     }
 });
+
+todoListElement.addEventListener("click", handleTodoClick); // Centralized event handler
 
 // Function to add a new to-do item
 function addTodo() {
@@ -105,203 +151,74 @@ function addTodo() {
     // Create a new TodoItem object
     const newTodo = new TodoItem(todoText, false, dueDate, priority);
     todoList.addTodo(newTodo); // Add the new TodoItem to the TodoList
-    
+
     // Clear the input field
     newTodoInput.value = "";
     newTodoDueDate.value = "";
     newTodoPriority.value = "Medium";
+}
 
-    // Create a new list item (li) element
-    const newTodoItem = document.createElement("li");
-    // Add span element for the text
-    const textSpan = document.createElement("span");
-    textSpan.textContent = newTodo.text;
-    // textSpan.addEventListener("click", startEdit); // We'll handle this differently later
-    newTodoItem.appendChild(textSpan);
+function handleTodoClick(event) {
+    const target = event.target;
+    const listItem = target.closest("li"); // Find the closest li ancestor
 
-    // Add due date span (if a date is provided)
-    if (dueDate) {
-        const dueDateSpan = document.createElement('span');
-        dueDateSpan.classList.add('due-date'); // Add class for styling
-        dueDateSpan.textContent = `Due: ${newTodo.dueDate}`;
-        newTodoItem.appendChild(dueDateSpan);
+    if (!listItem) return; // Clicked outside a list item
+
+    const todoId = listItem.dataset.id;
+    const todo = todoList.findTodoById(todoId);
+
+    if (!todo) return; // Couldn't find the TodoItem (shouldn't happen)
+
+    if (target.tagName === "BUTTON") {
+        // Delete button was clicked
+        todoList.removeTodo(todoId);
+    } else if (target.classList.contains("todo-text")) {
+        // To-do text was clicked - start editing
+        startEdit(listItem, todo);
+    } else {
+        // The li itself was clicked (not the button) - toggle complete
+        todo.toggleComplete();
+        todoList.saveTodos(); // Save after toggling
+        todoList.render(); // Re-render to update the UI
     }
-
-    // Add priority span
-    const prioritySpan = document.createElement('span');
-    prioritySpan.classList.add('priority'); // Add class for styling
-    prioritySpan.classList.add(newTodo.priority);   // Add priority-specific class
-    prioritySpan.textContent = newTodo.priority;
-    newTodoItem.appendChild(prioritySpan);
-
-    // Create a delete button
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete";
-    // Add event listener in delete button
-    // deleteButton.addEventListener("click", deleteTodo); // We'll handle this differently later
-
-    // Add the delete button to the li
-    newTodoItem.appendChild(deleteButton);
-
-    // Add event listener for toggle complete in the newTodoItem
-    // newTodoItem.addEventListener("click", toggleComplete); // We'll handle this differently later
-
-    // Add the new li element to the ul
-    todoListElement.appendChild(newTodoItem); // Append to the actual list element
-
-
-    // saveTodos(); // We'll handle this differently later
-    console.log(todoList.todos); // Log the array of TodoItems (for debugging)
 }
 
-// Function to toggle the 'completed' class on a to-do item
-function toggleComplete(event) {
-    /*
-    // 'this' refers to the element that was clicked (the li)
-    if (event.target === this) {
-        this.classList.toggle("completed");
-        saveTodos();
-    }
-        */
-}
-
-// Function to delete a to-do item
-function deleteTodo() {
-    /*
-    // 'this' refers to the element that was clicked (the button)
-    // parentElement refers to the parent of the button (the li)
-    this.parentElement.remove();
-    saveTodos();
-    */
-}
-
-// Function to save to-dos to localStorage
-function saveTodos() {
-    /*
-    const todos = [];
-    const todoItems = todoList.querySelectorAll("li");
-
-    todoItems.forEach((item) => {
-        // Get span element to get the text
-        const textSpan = item.querySelector("span");
-        //Find due-date and priority element, can be null.
-        const dueDateSpan = item.querySelector('.due-date');
-        const prioritySpan = item.querySelector('.priority');
-
-        todos.push({
-            text: textSpan.textContent,
-            completed: item.classList.contains("completed"),
-            dueDate: dueDateSpan ? dueDateSpan.textContent.replace('Due: ', '').trim() : null, // Extract and save due date
-            priority: prioritySpan ? prioritySpan.textContent : null, // Extract and save priority
-        });
-    });
-
-    localStorage.setItem("todos", JSON.stringify(todos));
-    */
-}
-
-function loadTodos() {
-    /*
-    const savedTodos = localStorage.getItem("todos");
-
-    if (savedTodos) {
-        const todos = JSON.parse(savedTodos);
-
-        todos.forEach((todo) => {
-            const newTodoItem = document.createElement("li");
-            // Add span element for the text
-            const textSpan = document.createElement("span");
-            textSpan.textContent = todo.text;
-            textSpan.addEventListener("click", startEdit);
-            newTodoItem.appendChild(textSpan);
-
-            // Add due date span (if a date is provided)
-            if (todo.dueDate) {
-                const dueDateSpan = document.createElement('span');
-                dueDateSpan.classList.add('due-date');
-                dueDateSpan.textContent = `Due: ${todo.dueDate}`;
-                newTodoItem.appendChild(dueDateSpan);
-            }
-
-            // Add priority span
-            if(todo.priority) {
-                const prioritySpan = document.createElement('span');
-                prioritySpan.classList.add('priority');
-                prioritySpan.classList.add(todo.priority);  // Add the priority as a class
-                prioritySpan.textContent = todo.priority;
-                newTodoItem.appendChild(prioritySpan);
-            }
-
-            // Important add class 'completed' if the task was completed
-            if (todo.completed) {
-                newTodoItem.classList.add("completed");
-            }
-
-            const deleteButton = document.createElement("button");
-            deleteButton.textContent = "Delete";
-            deleteButton.addEventListener("click", deleteTodo);
-            newTodoItem.appendChild(deleteButton);
-
-            newTodoItem.addEventListener("click", toggleComplete);
-            todoList.appendChild(newTodoItem);
-        });
-    }
-    */
-}
-
-// Function to start editing a to-do
-function startEdit() {
-    /*
-    const listItem = this.parentElement; // Get the parent li
-    const currentText = this.textContent;
+function startEdit(listItem, todo) {
+    // Hide the text
+    const textSpan = listItem.querySelector(".todo-text");
+    textSpan.classList.add("editing");
 
     const editInput = document.createElement("input");
     editInput.type = "text";
-    editInput.value = currentText;
+    editInput.value = todo.text;
+    listItem.prepend(editInput); // Add to begin of list item
+    editInput.focus();
 
-    // Replace the span with the input field
-    listItem.replaceChild(editInput, this);
-
-    editInput.focus(); // Automatically focus the input field
-
-    // Event Listener for pressing Enter
     editInput.addEventListener("keypress", function (event) {
         if (event.key === "Enter") {
-            finishEdit(listItem, editInput);
+            finishEdit(listItem, editInput, todo);
         }
     });
 
-    // Event listener for clicking outside the input (blur event)
-    editInput.addEventListener("blur", function () {
-        finishEdit(listItem, editInput);
+    editInput.addEventListener('blue', function() {
+        finishEdit(listItem, editInput, todo);
     });
-    */
 }
 
-// Function to finish editing and save changes
-function finishEdit(listItem, editInput) {
-    /*
-    // Check if we're already processing an edit
-    if (editInput.dataset.editing === "true") {
+function finishEdit(listItem, editInput, todo) {
+    if (editInput.dataset.editing === 'true') {
         return; // Exit the function if already editing
     }
 
     // Mark as editing to prevent concurrent calls
-    editInput.dataset.editing = "true";
+    editInput.dataset.editing = 'true';
 
     const newText = editInput.value;
-
-    // Create a new span with the updated text
-    const newTextSpan = document.createElement("span");
-    newTextSpan.textContent = newText;
-    newTextSpan.addEventListener("click", startEdit); // Re-attach the edit listener
-
-    // Replace the input field with the new span
-    listItem.replaceChild(newTextSpan, editInput);
-
-    // Remove the editing flag (not strictly necessary, but good practice)
+    todo.updateText(newText); // Use the updateText method
+    todoList.saveTodos(); // Save the changes
+    todoList.render(); // Re-render the list
     delete editInput.dataset.editing;
-
-    saveTodos(); // Save the changes
-    */
 }
+
+// Initial render
+todoList.render();

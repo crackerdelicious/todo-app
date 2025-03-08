@@ -98,3 +98,7 @@ body {
 #todo-list li .priority.High { color: red; }
 #todo-list li .priority.Medium { color: orange; }
 #todo-list li .priority.Low { color: green; }
+
+#todo-list li .editing {
+    display: none;
+}
