@@ -74,3 +74,27 @@ body {
     font-size: 1em;
     border: 1px solid #ccc;
 }
+
+#new-todo-due-date,
+#new-todo-priority {
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#todo-list li .due-date {
+    font-size: 0.8em;
+    color: #888;
+    margin-right: 10px;
+}
+
+#todo-list li .priority {
+    font-size: 0.8em;
+    font-weight: bold; /* Make priority stand out */
+    margin-right: 10px;
+}
+
+#todo-list li .priority.High { color: red; }
+#todo-list li .priority.Medium { color: orange; }
+#todo-list li .priority.Low { color: green; }

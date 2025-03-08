@@ -2,12 +2,17 @@
 const newTodoInput = document.getElementById("new-todo-input");
 const addTodoButton = document.getElementById("add-todo-button");
 const todoList = document.getElementById("todo-list");
+const newTodoDueDate = document.getElementById('new-todo-due-date');
+const newTodoPriority = document.getElementById('new-todo-priority');
 
+// Load to-dos from localStorage
 loadTodos();
 
 // Function to add a new to-do item
 function addTodo() {
     const todoText = newTodoInput.value; // Get the text from the input field
+    const dueDate = newTodoDueDate.value; // Get due date
+    const priority = newTodoPriority.value; // Get priority
 
     // Check if the input is empty
     if (todoText.trim() === "") {
@@ -22,6 +27,21 @@ function addTodo() {
     textSpan.textContent = todoText;
     textSpan.addEventListener("click", startEdit); // Add event listener for editing
     newTodoItem.appendChild(textSpan);
+
+    // Add due date span (if a date is provided)
+    if (dueDate) {
+        const dueDateSpan = document.createElement('span');
+        dueDateSpan.classList.add('due-date'); // Add class for styling
+        dueDateSpan.textContent = `Due: ${dueDate}`;
+        newTodoItem.appendChild(dueDateSpan);
+    }
+
+    // Add priority span
+    const prioritySpan = document.createElement('span');
+    prioritySpan.classList.add('priority'); // Add class for styling
+    prioritySpan.classList.add(priority);   // Add priority-specific class
+    prioritySpan.textContent = priority;
+    newTodoItem.appendChild(prioritySpan);
 
     // Create a delete button
     const deleteButton = document.createElement("button");
@@ -68,10 +88,15 @@ function saveTodos() {
     todoItems.forEach((item) => {
         // Get span element to get the text
         const textSpan = item.querySelector("span");
+        //Find due-date and priority element, can be null.
+        const dueDateSpan = item.querySelector('.due-date');
+        const prioritySpan = item.querySelector('.priority');
 
         todos.push({
             text: textSpan.textContent,
             completed: item.classList.contains("completed"),
+            dueDate: dueDateSpan ? dueDateSpan.textContent.replace('Due: ', '').trim() : null, // Extract and save due date
+            priority: prioritySpan ? prioritySpan.textContent : null, // Extract and save priority
         });
     });
 
@@ -91,6 +116,23 @@ function loadTodos() {
             textSpan.textContent = todo.text;
             textSpan.addEventListener("click", startEdit);
             newTodoItem.appendChild(textSpan);
+
+            // Add due date span (if a date is provided)
+            if (todo.dueDate) {
+                const dueDateSpan = document.createElement('span');
+                dueDateSpan.classList.add('due-date');
+                dueDateSpan.textContent = `Due: ${todo.dueDate}`;
+                newTodoItem.appendChild(dueDateSpan);
+            }
+
+            // Add priority span
+            if(todo.priority) {
+                const prioritySpan = document.createElement('span');
+                prioritySpan.classList.add('priority');
+                prioritySpan.classList.add(todo.priority);  // Add the priority as a class
+                prioritySpan.textContent = todo.priority;
+                newTodoItem.appendChild(prioritySpan);
+            }
 
             // Important add class 'completed' if the task was completed
             if (todo.completed) {

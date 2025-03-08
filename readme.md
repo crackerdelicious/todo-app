@@ -852,7 +852,7 @@ This chapter demonstrates a common pattern in web development: handling user inp
 ---
 Okay, let's add some more advanced features in Chapter 5!
 
-**Chapter 5: Adding Due Dates and Priorities**
+# Chapter 5: Adding Due Dates and Priorities
 
 In this chapter, we'll enhance our to-do list by adding two new features:
 
@@ -861,7 +861,7 @@ In this chapter, we'll enhance our to-do list by adding two new features:
 
 We'll update the HTML, CSS, and JavaScript to accommodate these new features. We'll also need to modify how we store and load the data in `localStorage`.
 
-# 1. Update `index.html` (Add input fields for due date and priority):
+## 1. Update `index.html` (Add input fields for due date and priority):
 
 ```html
 <!DOCTYPE html>
@@ -893,14 +893,14 @@ We'll update the HTML, CSS, and JavaScript to accommodate these new features. We
 </html>
 ```
 
-## Changes in `index.html`:
+### Changes in `index.html`:
 
 *   **`<input type="date" id="new-todo-due-date">`:**  Adds a date input field.  The `type="date"` attribute provides a native date picker in most modern browsers.
 *   **`<select id="new-todo-priority">`:** Adds a dropdown select element for choosing the priority.
     *   We provide three options: "High", "Medium", and "Low".
     *   "Medium" is selected by default (`selected` attribute).
 
-# 2. Update `style.css` (Add styles for the new inputs):
+## 2. Update `style.css` (Add styles for the new inputs):
 
 ```css
 /* Existing styles... */
@@ -930,14 +930,14 @@ We'll update the HTML, CSS, and JavaScript to accommodate these new features. We
 #todo-list li .priority.Low { color: green; }
 ```
 
-## Changes in `style.css`:
+### Changes in `style.css`:
 
 *   **`#new-todo-due-date, #new-todo-priority`:**  Styles the new input fields with padding, borders, and rounded corners.
 *  Add style for `due-date` class to display with gray color
 *   **`#todo-list li .priority`:** Styles for priority.
 *   **`#todo-list li .priority.[High|Medium|Low]`:**  Applies different colors based on the priority.
 
-# 3. Update `script.js` (Handle due dates and priorities):
+## 3. Update `script.js` (Handle due dates and priorities):
 
 ```javascript
 // Get references to the HTML elements
@@ -1150,7 +1150,7 @@ newTodoInput.addEventListener('keypress', function(event) {
 });
 ```
 
-## Explanation of Changes in `script.js`:**
+### Explanation of Changes in `script.js`:**
 
 *   **Get References:** We get references to the new `newTodoDueDate` and `newTodoPriority` elements.
 *   **`addTodo()` (Modified):**
