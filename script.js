@@ -1,9 +1,52 @@
+// ------ TodoItem Class ------
+class TodoItem {
+    constructor(text, completed = false, dueDate = null, priority = 'Medium') {
+        this.text = text;
+        this.completed = completed;
+        this.dueDate = dueDate;
+        this.priority = priority;
+        this.id = this.generatedId(); // Add a unique ID
+    }
+
+    generatedId() {
+        return Math.random().toString(36).substring(2, 15) + 
+        Math.random().toString(36).substring(2, 15)
+    }
+
+    toggleComplete() {
+        this.completed = !this.completed;
+    }
+
+    updateText(newText) {
+        this.text = newText;
+    }
+
+    updateDueDate(newDueDate) {
+        this.dueDate = newDueDate;
+    }
+
+    updatePriority(newPriority) {
+        this.newPriority = newPriority
+    }
+}
+
 // Get references to the HTML elements we need to interact with
 const newTodoInput = document.getElementById("new-todo-input");
 const addTodoButton = document.getElementById("add-todo-button");
 const todoList = document.getElementById("todo-list");
 const newTodoDueDate = document.getElementById('new-todo-due-date');
 const newTodoPriority = document.getElementById('new-todo-priority');
+
+// Add an event listener to the button to call the addTodo function when clicked
+addTodoButton.addEventListener("click", addTodo);
+// Add event listener for the 'Enter' Key
+newTodoInput.addEventListener("keypress", function (event) {
+    if (event.key === "Enter") {
+        addTodo();
+    }
+});
+
+
 
 // Load to-dos from localStorage
 loadTodos();
@@ -20,68 +63,79 @@ function addTodo() {
         return; // Stop the function if the input is empty
     }
 
+    // Create a new TodoItem object
+    const newTodo = new TodoItem(todoText, false, dueDate, priority);
+
     // Create a new list item (li) element
     const newTodoItem = document.createElement("li");
     // Add span element for the text
     const textSpan = document.createElement("span");
-    textSpan.textContent = todoText;
-    textSpan.addEventListener("click", startEdit); // Add event listener for editing
+    textSpan.textContent = newTodo.text;
+    // textSpan.addEventListener("click", startEdit); // We'll handle this differently later
     newTodoItem.appendChild(textSpan);
 
     // Add due date span (if a date is provided)
     if (dueDate) {
         const dueDateSpan = document.createElement('span');
         dueDateSpan.classList.add('due-date'); // Add class for styling
-        dueDateSpan.textContent = `Due: ${dueDate}`;
+        dueDateSpan.textContent = `Due: ${newTodo.dueDate}`;
         newTodoItem.appendChild(dueDateSpan);
     }
 
     // Add priority span
     const prioritySpan = document.createElement('span');
     prioritySpan.classList.add('priority'); // Add class for styling
-    prioritySpan.classList.add(priority);   // Add priority-specific class
-    prioritySpan.textContent = priority;
+    prioritySpan.classList.add(newTodo.priority);   // Add priority-specific class
+    prioritySpan.textContent = newTodo.priority;
     newTodoItem.appendChild(prioritySpan);
 
     // Create a delete button
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     // Add event listener in delete button
-    deleteButton.addEventListener("click", deleteTodo);
+    // deleteButton.addEventListener("click", deleteTodo); // We'll handle this differently later
 
     // Add the delete button to the li
     newTodoItem.appendChild(deleteButton);
 
     // Add event listener for toggle complete in the newTodoItem
-    newTodoItem.addEventListener("click", toggleComplete);
+    // newTodoItem.addEventListener("click", toggleComplete); // We'll handle this differently later
 
     // Add the new li element to the ul
     todoList.appendChild(newTodoItem);
     // Clear the input field
     newTodoInput.value = "";
+    newTodoDueDate.value = "";
+    newTodoPriority.value = "Medium";
 
-    saveTodos();
+    // saveTodos(); // We'll handle this differently later
+    console.log(newTodo);
 }
 
 // Function to toggle the 'completed' class on a to-do item
 function toggleComplete(event) {
+    /*
     // 'this' refers to the element that was clicked (the li)
     if (event.target === this) {
         this.classList.toggle("completed");
         saveTodos();
     }
+        */
 }
 
 // Function to delete a to-do item
 function deleteTodo() {
+    /*
     // 'this' refers to the element that was clicked (the button)
     // parentElement refers to the parent of the button (the li)
     this.parentElement.remove();
     saveTodos();
+    */
 }
 
 // Function to save to-dos to localStorage
 function saveTodos() {
+    /*
     const todos = [];
     const todoItems = todoList.querySelectorAll("li");
 
@@ -101,9 +155,11 @@ function saveTodos() {
     });
 
     localStorage.setItem("todos", JSON.stringify(todos));
+    */
 }
 
 function loadTodos() {
+    /*
     const savedTodos = localStorage.getItem("todos");
 
     if (savedTodos) {
@@ -148,10 +204,12 @@ function loadTodos() {
             todoList.appendChild(newTodoItem);
         });
     }
+    */
 }
 
 // Function to start editing a to-do
 function startEdit() {
+    /*
     const listItem = this.parentElement; // Get the parent li
     const currentText = this.textContent;
 
@@ -175,10 +233,12 @@ function startEdit() {
     editInput.addEventListener("blur", function () {
         finishEdit(listItem, editInput);
     });
+    */
 }
 
 // Function to finish editing and save changes
 function finishEdit(listItem, editInput) {
+    /*
     // Check if we're already processing an edit
     if (editInput.dataset.editing === "true") {
         return; // Exit the function if already editing
@@ -201,14 +261,5 @@ function finishEdit(listItem, editInput) {
     delete editInput.dataset.editing;
 
     saveTodos(); // Save the changes
+    */
 }
-
-// Add an event listener to the button to call the addTodo function when clicked
-addTodoButton.addEventListener("click", addTodo);
-
-// Add event listener for the 'Enter' Key
-newTodoInput.addEventListener("keypress", function (event) {
-    if (event.key === "Enter") {
-        addTodo();
-    }
-});
