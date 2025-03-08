@@ -66,3 +66,11 @@ body {
 #todo-list li button:hover {
      background-color: #da190b;
 }
+
+#todo-list li input[type="text"] {
+    width: 80%;
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+}

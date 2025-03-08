@@ -17,19 +17,23 @@ function addTodo() {
 
     // Create a new list item (li) element
     const newTodoItem = document.createElement("li");
-    newTodoItem.textContent = todoText; // Set the text content of the li
+    // Add span element for the text
+    const textSpan = document.createElement("span");
+    textSpan.textContent = todoText;
+    textSpan.addEventListener("click", startEdit); // Add event listener for editing
+    newTodoItem.appendChild(textSpan);
 
     // Create a delete button
-    const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Delete';
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
     // Add event listener in delete button
-    deleteButton.addEventListener('click', deleteTodo);
+    deleteButton.addEventListener("click", deleteTodo);
 
     // Add the delete button to the li
     newTodoItem.appendChild(deleteButton);
 
     // Add event listener for toggle complete in the newTodoItem
-    newTodoItem.addEventListener('click', toggleComplete);
+    newTodoItem.addEventListener("click", toggleComplete);
 
     // Add the new li element to the ul
     todoList.appendChild(newTodoItem);
@@ -40,10 +44,12 @@ function addTodo() {
 }
 
 // Function to toggle the 'completed' class on a to-do item
-function toggleComplete() {
+function toggleComplete(event) {
     // 'this' refers to the element that was clicked (the li)
-    this.classList.toggle('completed');
-    saveTodos();
+    if (event.target === this) {
+        this.classList.toggle("completed");
+        saveTodos();
+    }
 }
 
 // Function to delete a to-do item
@@ -57,42 +63,102 @@ function deleteTodo() {
 // Function to save to-dos to localStorage
 function saveTodos() {
     const todos = [];
-    const todoItems = todoList.querySelectorAll('li');
+    const todoItems = todoList.querySelectorAll("li");
 
-    todoItems.forEach(item => {
+    todoItems.forEach((item) => {
+        // Get span element to get the text
+        const textSpan = item.querySelector("span");
+
         todos.push({
-            text: item.textContent.replace('Delete', '').trim(), // Remove the text 'delete from textContent.
-            completed: item.classList.contains('completed'),
+            text: textSpan.textContent,
+            completed: item.classList.contains("completed"),
         });
     });
 
-    localStorage.setItem('todos', JSON.stringify(todos));
+    localStorage.setItem("todos", JSON.stringify(todos));
 }
 
 function loadTodos() {
-    const savedTodos = localStorage.getItem('todos');
+    const savedTodos = localStorage.getItem("todos");
 
     if (savedTodos) {
         const todos = JSON.parse(savedTodos);
 
-        todos.forEach(todo => {
-            const newTodoItem = document.createElement('li');
-            newTodoItem.textContent = todo.text;
+        todos.forEach((todo) => {
+            const newTodoItem = document.createElement("li");
+            // Add span element for the text
+            const textSpan = document.createElement("span");
+            textSpan.textContent = todo.text;
+            textSpan.addEventListener("click", startEdit);
+            newTodoItem.appendChild(textSpan);
 
             // Important add class 'completed' if the task was completed
             if (todo.completed) {
-                newTodoItem.classList.add('completed');
+                newTodoItem.classList.add("completed");
             }
 
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = 'Delete';
-            deleteButton.addEventListener('click', deleteTodo);
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.addEventListener("click", deleteTodo);
             newTodoItem.appendChild(deleteButton);
 
-            newTodoItem.addEventListener('click', toggleComplete);
+            newTodoItem.addEventListener("click", toggleComplete);
             todoList.appendChild(newTodoItem);
         });
     }
+}
+
+// Function to start editing a to-do
+function startEdit() {
+    const listItem = this.parentElement; // Get the parent li
+    const currentText = this.textContent;
+
+    const editInput = document.createElement("input");
+    editInput.type = "text";
+    editInput.value = currentText;
+
+    // Replace the span with the input field
+    listItem.replaceChild(editInput, this);
+
+    editInput.focus(); // Automatically focus the input field
+
+    // Event Listener for pressing Enter
+    editInput.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+            finishEdit(listItem, editInput);
+        }
+    });
+
+    // Event listener for clicking outside the input (blur event)
+    editInput.addEventListener("blur", function () {
+        finishEdit(listItem, editInput);
+    });
+}
+
+// Function to finish editing and save changes
+function finishEdit(listItem, editInput) {
+    // Check if we're already processing an edit
+    if (editInput.dataset.editing === "true") {
+        return; // Exit the function if already editing
+    }
+
+    // Mark as editing to prevent concurrent calls
+    editInput.dataset.editing = "true";
+
+    const newText = editInput.value;
+
+    // Create a new span with the updated text
+    const newTextSpan = document.createElement("span");
+    newTextSpan.textContent = newText;
+    newTextSpan.addEventListener("click", startEdit); // Re-attach the edit listener
+
+    // Replace the input field with the new span
+    listItem.replaceChild(newTextSpan, editInput);
+
+    // Remove the editing flag (not strictly necessary, but good practice)
+    delete editInput.dataset.editing;
+
+    saveTodos(); // Save the changes
 }
 
 // Add an event listener to the button to call the addTodo function when clicked
